@@ -18,7 +18,6 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         'Genre',
-        on_delete=models.DO_NOTHING
     )
     category = models.ForeignKey(
         'Category',
