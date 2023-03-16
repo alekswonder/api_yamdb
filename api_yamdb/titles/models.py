@@ -31,6 +31,9 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
+    def get_genres(self):
+        return '\n'.join([g.name for g in self.genre.all()])
+
     def __str__(self):
         return self.name
 

@@ -6,8 +6,7 @@ from .models import Genre, Category, Title
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
     """Настройка панели администратора для модели Title(Произведения)"""
-    list_display = ('name', 'year', 'description',
-                    'genre', 'category')
+    list_display = ('name', 'year', 'get_genres', 'description', 'category')
     list_filter = ('genre', 'category', 'year')
     search_fields = ('name', 'description')
     ordering = ('genre', 'category', 'year')
