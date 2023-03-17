@@ -32,6 +32,7 @@ class Title(models.Model):
         verbose_name_plural = 'Произведения'
 
     def get_genres(self):
+        """Получаем названия жанров для отображения их в админ панели"""
         return '\n'.join([g.name for g in self.genre.all()])
 
     def __str__(self):
@@ -56,6 +57,14 @@ class Genre(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class GenreTitle(models.Model):
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.genre} {self.title}'
 
 
 class Category(models.Model):
