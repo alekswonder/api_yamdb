@@ -116,6 +116,7 @@ class Review(models.Model):
         auto_now_add=True,
         verbose_name='Дата добавления'
     )
+    default_related_name = 'reviews'
 
     class Meta:
         constraints = [
@@ -124,7 +125,6 @@ class Review(models.Model):
                 name='unique_author_review'
             )
         ]
-        default_related_name = 'reviews'
         ordering = ('-pub_date',)
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
@@ -150,9 +150,9 @@ class Comment(models.Model):
         auto_now_add=True,
         verbose_name='Дата добавления'
     )
+    default_related_name = 'comments'
 
     class Meta:
-        default_related_name = 'comments'
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         ordering = ['pub_date']
