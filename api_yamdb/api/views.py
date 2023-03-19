@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """Представление модели Title."""
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     # TODO: permission_classes = ...
@@ -18,6 +19,7 @@ class GenreViewSet(mixins.ListModelMixin,
                    mixins.CreateModelMixin,
                    mixins.DestroyModelMixin,
                    viewsets.GenericViewSet):
+    """Представление модели Genre."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     # TODO: permission_classes = ...
@@ -28,6 +30,7 @@ class CategoryViewSet(mixins.ListModelMixin,
                       mixins.CreateModelMixin,
                       mixins.DestroyModelMixin,
                       viewsets.GenericViewSet):
+    """Представление модели Category."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     # TODO: permission_classes = ...
@@ -35,7 +38,7 @@ class CategoryViewSet(mixins.ListModelMixin,
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """Класс взаимодействия с моделью Review."""
+    """Представление модели Review."""
     serializer_class = ReviewSerializer
     # TODO: permission_classes = ...
 
@@ -50,7 +53,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """Класс взаимодействия с моделью Comment."""
+    """Представление модели Comment."""
     serializer_class = CommentSerializer
     # TODO: permission_classes = ...
 

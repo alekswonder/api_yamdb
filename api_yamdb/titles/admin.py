@@ -20,7 +20,7 @@ class GenreAdmin(admin.ModelAdmin):
 
 
 @admin.register(Category)
-class Category(admin.ModelAdmin):
+class CategoryAdmin(admin.ModelAdmin):
     """Настройка панели администратора для модели Category(Категории)"""
     list_display = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}

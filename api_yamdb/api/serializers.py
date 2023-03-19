@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
@@ -6,12 +7,14 @@ from titles.models import Category, Genre, Title, GenreTitle, Review, Comment
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализация объектов типа Genre"""
     class Meta:
         fields = ('name', 'slug')
         model = Genre
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализация объектов типа Title"""
     rating = serializers.SerializerMethodField()
     genres = GenreSerializer(many=True)
     category = serializers.SlugRelatedField(
@@ -38,18 +41,14 @@ class TitleSerializer(serializers.ModelSerializer):
         return title
 
     def get_rating(self, obj):
-        """Происходит агрегирующий запрос по среднему арифметическому значению
-        по полю 'score' таблицы Review, которые относятся к таблице Title,
-        через обратное отношение
-        Пример: obj - экземпляр класса Title
-        Мы через обратное отношение review_set, либо related_name
-        obj.review_set.aggregate(Avg('score'))
-        получаем среднеарифметическое всех оценок
+        """Среднеарифметическое значение оценок,
+        относящихся к одному произведению
         """
-        return 0
+        return obj.reviews.aggregate(Avg('score'))
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализация объектов типа Category"""
     class Meta:
         fields = ('name', 'slug')
         model = Category
