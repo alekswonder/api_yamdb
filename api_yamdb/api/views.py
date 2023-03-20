@@ -1,18 +1,20 @@
-from rest_framework import viewsets, mixins
-
-from .serializers import (
-    TitleSerializer, GenreSerializer, CategorySerializer,
-    CommentSerializer, ReviewSerializer)
-from titles.models import Title, Genre, Category, Review
 from django.shortcuts import get_object_or_404
+
+from rest_framework import viewsets, mixins
+from rest_framework.pagination import PageNumberPagination
+
+from .serializers import (TitleSerializer, GenreSerializer, CategorySerializer,
+                          CommentSerializer, ReviewSerializer)
+from titles.models import Title, Genre, Category, Review
+from .pagination import ComplexObjectPagination
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Представление модели Title."""
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    pagination_class = ComplexObjectPagination
     # TODO: permission_classes = ...
-    # TODO: pagination_class = ...
 
 
 class GenreViewSet(mixins.ListModelMixin,
@@ -22,7 +24,7 @@ class GenreViewSet(mixins.ListModelMixin,
     """Представление модели Genre."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    # TODO: permission_classes = ...
+    permission_classes = PageNumberPagination
     # TODO: pagination_class = ...
 
 
@@ -33,13 +35,14 @@ class CategoryViewSet(mixins.ListModelMixin,
     """Представление модели Category."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = PageNumberPagination
     # TODO: permission_classes = ...
-    # TODO: pagination_class = ...
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Представление модели Review."""
     serializer_class = ReviewSerializer
+    pagination_class = ComplexObjectPagination
     # TODO: permission_classes = ...
 
     def get_queryset(self):
@@ -55,6 +58,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """Представление модели Comment."""
     serializer_class = CommentSerializer
+    pagination_class = ComplexObjectPagination
     # TODO: permission_classes = ...
 
     def get_queryset(self):
