@@ -4,18 +4,18 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand):
     help = ('Enter file name that contains data which you want to fill the'
             'table. Make sure that file name you input represents concrete '
-            'table name in database.')
+            'table name in database and has not its extension (csv).')
 
     def add_arguments(self, parser):
         parser.add_argument('file_names', nargs='+', type=str)
 
     def handle(self, *args, **options):
         for file_name in options['file_names']:
-            with open(f'static/data/{file_name}', 'r') as data_file:
-                f_name = file_name.rstrip('.csv').capitalize()
+            with open(f'static/data/{file_name}.csv', 'r') as data_file:
+                f_name = file_name
                 if f_name.endswith('s'):
                     f_name = file_name[:len(f_name) - 1]
-                elif f_name.find('_') != -1:
+                if f_name.find('_') != -1:
                     f_name = file_name.replace('_',
                                                ' ').title().replace(' ', '')
                 fields = [i for i in data_file.readline().rstrip('\n'
