@@ -33,3 +33,21 @@ class AuthSerializer(serializers.Serializer):
             settings.ADMIN_EMAIL,
             [self.validated_data['email']],
         )
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Проверка данных юзера"""
+    role = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('bio', 'email', 'first_name',
+                  'last_name', 'role', 'username')
+
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    """Проверка данных админа"""
+    class Meta:
+        model = User
+        fields = ('bio', 'email', 'first_name',
+                  'last_name', 'role', 'username')
