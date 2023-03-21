@@ -2,7 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-import rest_framework.pagination
+
 from dotenv import load_dotenv
 
 load_dotenv()

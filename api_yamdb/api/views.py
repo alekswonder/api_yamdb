@@ -2,15 +2,22 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from rest_framework import viewsets, permissions, status
+from rest_framework import filters, viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+
+
+from .permissions import CustomAdminPermission
+from .serializers import (AuthSerializer, AdminUserSerializer, UserSerializer)
+
+from .serializers import AuthSerializer
 from users.models import User
 
 CONFIRM_ERROR = 'Неверный код подтвержения'
+
 
 class AuthViewSet(viewsets.GenericViewSet):
     """Регистрация и получение кода подтверждения"""
@@ -47,3 +54,32 @@ class AuthViewSet(viewsets.GenericViewSet):
         tokens = dict(access_token=str(refresh.access_tokens),
                       refresh_token=str(refresh))
         return Response(tokens, status=status.HTTP_200_OK)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = AdminUserSerializer
+    permission_classes = (CustomAdminPermission,)
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    filterset_fields = ('username',)
+    search_fields = ('username',)
+    lookup_field = 'username'
+
+    @action(detail=False, methods=['GET', 'PATCH'],
+            permission_classes=[IsAuthenticated])
+    def me(self, request):
+        user = request.user
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif request.method == 'PATCH':
+            if user.role == 'user':
+                serializer = UserSerializer(user,
+                                            data=request.data, partial=True)
+            else:
+                serializer = AdminUserSerializer(user, data=request.data,
+                                                 partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
