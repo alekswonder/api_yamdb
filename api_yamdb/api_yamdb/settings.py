@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import rest_framework.pagination
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -26,6 +27,7 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'titles.apps.TitlesConfig',
+    'api.apps.ApiConfig',
     'users.apps.UsersConfig',
 ]
 
@@ -99,6 +101,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
 
 AUTH_USER_MODEL = 'users.User'
 
