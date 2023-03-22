@@ -33,7 +33,7 @@ class Command(BaseCommand):
                     )
                 ]
                 try:
-                    if f_name == 'Title':
+                    if f_name == Title.__name__:
                         for kwargs in data:
                             eval(f_name).objects.create(
                                 id=kwargs['id'],
@@ -42,14 +42,14 @@ class Command(BaseCommand):
                                 category=Category.objects.get(
                                     pk=kwargs['category_id'])
                             )
-                    elif f_name == 'GenreTitle':
+                    elif f_name == GenreTitle.__name__:
                         for kwargs in data:
                             eval(f_name).objects.create(
                                 id=kwargs['id'],
                                 genre=Genre.objects.get(pk=kwargs['genre_id']),
                                 title=Title.objects.get(pk=kwargs['title_id']),
                             )
-                    elif f_name == 'Review':
+                    elif f_name == Review.__name__:
                         for kwargs in data:
                             eval(f_name).objects.create(
                                 id=kwargs['id'],
@@ -59,7 +59,7 @@ class Command(BaseCommand):
                                 score=kwargs['score'],
                                 pub_date=kwargs['pub_date']
                             )
-                    elif f_name == 'Comment':
+                    elif f_name == Comment.__name__:
                         for kwargs in data:
                             eval(f_name).objects.create(
                                 id=kwargs['id'],
