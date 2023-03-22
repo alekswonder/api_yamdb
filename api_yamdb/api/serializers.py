@@ -13,7 +13,7 @@ from users.models import User
 
 USERNAME_ERROR = 'Имя должно содержать от 6 до 15 символов'
 CONFIRM = 'Код подтверждения'
-CONFIRM_NOTEFICATION = 'Ваш код подтверждения'
+CONFIRM_NOTIFICATION = 'Ваш код подтверждения'
 
 
 class AuthSerializer(serializers.Serializer):
@@ -33,7 +33,7 @@ class AuthSerializer(serializers.Serializer):
         confirmation_code = default_token_generator.make_token(user)
         send_mail(
             CONFIRM,
-            f"{CONFIRM_NOTEFICATION}: {confirmation_code}",
+            f"{CONFIRM_NOTIFICATION}: {confirmation_code}",
             settings.ADMIN_EMAIL,
             [self.validated_data['email']],
         )
@@ -49,7 +49,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализация объектов типа Title"""
     rating = serializers.SerializerMethodField()
-    genres = GenreSerializer(many=True)
+    genre = GenreSerializer(many=True)
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug',
@@ -57,7 +57,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating',
-                  'description', 'genres', 'category')
+                  'description', 'genre', 'category')
         model = Title
         read_only_fields = ('category',)
 
