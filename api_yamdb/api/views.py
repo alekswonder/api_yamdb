@@ -16,6 +16,7 @@ from users.models import User
 
 CONFIRM_ERROR = 'Неверный код подтвержения'
 
+
 class AuthViewSet(viewsets.GenericViewSet):
     """Регистрация и получение кода подтверждения"""
     permission_classes = (permissions.AllowAny,)
