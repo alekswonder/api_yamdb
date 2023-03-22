@@ -137,3 +137,21 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         exclude = ('review',)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализация объектов типа Comment."""
+    role = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('bio', 'email', 'first_name',
+                  'last_name', 'role', 'username')
+
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    """Сериализация объектов админа."""
+    class Meta:
+        model = User
+        fields = ('bio', 'email', 'first_name',
+                  'last_name', 'role', 'username')
