@@ -2,16 +2,19 @@ from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
-from rest_framework import viewsets, mixins, permissions, status
+from rest_framework import viewsets, mixins, permissions, status, filters
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import (TitleSerializer, GenreSerializer, CategorySerializer,
-                          CommentSerializer, ReviewSerializer, AuthSerializer)
+                          CommentSerializer, ReviewSerializer, AuthSerializer,
+                          AdminUserSerializer, UserSerializer)
 from titles.models import Title, Genre, Category, Review
 from .pagination import ComplexObjectPagination
+from .permissions import CustomAdminPermission
 from users.models import User
 
 CONFIRM_ERROR = 'Неверный код подтвержения'
@@ -115,3 +118,33 @@ class CommentViewSet(viewsets.ModelViewSet):
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, id=review_id, title=title_id)
         serializer.save(author=self.request.user, review=review)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """Работа с юзерами"""
+    queryset = User.objects.all()
+    serializer_class = AdminUserSerializer
+    permission_classes = (CustomAdminPermission,)
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    filterset_fields = ('username',)
+    search_fields = ('username',)
+    lookup_field = 'username'
+
+    @action(detail=False, methods=['GET', 'PATCH'],
+            permission_classes=(IsAuthenticated,))
+    def me(self, request):
+        user = request.user
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif request.method == 'PATCH':
+            if user.role == 'user':
+                serializer = UserSerializer(user,
+                                            data=request.data, partial=True)
+            else:
+                serializer = AdminUserSerializer(user, data=request.data,
+                                                 partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
