@@ -4,7 +4,8 @@ from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 
-from titles.models import *
+from titles.models import (Title, GenreTitle, Review, Comment,
+                           Genre, User, Category)
 
 
 class Command(BaseCommand):

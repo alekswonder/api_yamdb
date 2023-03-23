@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-import rest_framework.pagination
+import django.core.mail.backends.console
 from dotenv import load_dotenv
 from datetime import timedelta
 
@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'django_filters',
 
     'titles.apps.TitlesConfig',
     'api.apps.ApiConfig',
@@ -121,6 +122,6 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = 'users.User'
 
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
-ADMIN_EMAIL = "gayland@paradise.com"
+ADMIN_EMAIL = "admin@yamdb.com"

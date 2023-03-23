@@ -1,6 +1,7 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets, mixins, permissions, status, filters
 from rest_framework.pagination import PageNumberPagination
@@ -9,15 +10,25 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import (TitleSerializer, GenreSerializer, CategorySerializer,
+from .filters import TitleFilterSet
+from .serializers import (GenreSerializer, CategorySerializer,
                           CommentSerializer, ReviewSerializer, AuthSerializer,
-                          AdminUserSerializer, UserSerializer)
+                          AdminUserSerializer, UserSerializer,
+                          TitleListSerializer, TitleCreateSerializer)
 from titles.models import Title, Genre, Category, Review
 from .pagination import ComplexObjectPagination
-from .permissions import CustomAdminPermission
+from .permissions import (CustomAdminPermission, AuthorOrReadOnly,
+                          SafeMethodAdminPermission, AdminOrAuthorOrReadOnly)
 from users.models import User
 
-CONFIRM_ERROR = 'Неверный код подтвержения'
+CONFIRM_ERROR = 'Неверный код подтверждения'
+
+
+class ListCreateDestroyViewSet(mixins.ListModelMixin,
+                               mixins.CreateModelMixin,
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet):
+    pass
 
 
 class AuthViewSet(viewsets.GenericViewSet):
@@ -60,38 +71,60 @@ class AuthViewSet(viewsets.GenericViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Представление модели Title."""
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+    serializer_class = TitleListSerializer
     pagination_class = ComplexObjectPagination
-    # TODO: permission_classes = ...
+    permission_classes = (SafeMethodAdminPermission, )
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilterSet
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleListSerializer
+        return TitleCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        output = TitleListSerializer(instance=Title.objects.last())
+        return Response(
+            output.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def update(self, request, *args, **kwargs):
+        super().update(request, *args, **kwargs)
+        output = TitleListSerializer(instance=self.get_object())
+        return Response(output.data)
 
 
-class GenreViewSet(mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class GenreViewSet(ListCreateDestroyViewSet):
     """Представление модели Genre."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = PageNumberPagination
-    # TODO: pagination_class = ...
+    pagination_classes = PageNumberPagination
+    permission_classes = (SafeMethodAdminPermission,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
-class CategoryViewSet(mixins.ListModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(ListCreateDestroyViewSet):
     """Представление модели Category."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = PageNumberPagination
-    # TODO: permission_classes = ...
+    pagination_classes = PageNumberPagination
+    permission_classes = (SafeMethodAdminPermission,)
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Представление модели Review."""
     serializer_class = ReviewSerializer
     pagination_class = ComplexObjectPagination
-    # TODO: permission_classes = ...
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -107,7 +140,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Представление модели Comment."""
     serializer_class = CommentSerializer
     pagination_class = ComplexObjectPagination
-    # TODO: permission_classes = ...
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
