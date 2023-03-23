@@ -7,8 +7,8 @@ from users.models import User
 class Title(models.Model):
     """Модель произведений, к которым пишут отзывы"""
     name = models.CharField(
-        max_length=255,
-        verbose_name='Название'
+        max_length=256,
+        verbose_name='Название',
     )
     year = models.PositiveIntegerField(
         verbose_name='Год создания',
@@ -45,7 +45,7 @@ class Title(models.Model):
 class Genre(models.Model):
     """Модель жанров произведений"""
     name = models.CharField(
-        max_length=255,
+        max_length=256,
         verbose_name='Название'
     )
     slug = models.SlugField(
@@ -73,7 +73,7 @@ class GenreTitle(models.Model):
 class Category(models.Model):
     """Модель категорий произведений"""
     name = models.CharField(
-        max_length=255,
+        max_length=256,
         verbose_name='Название'
     )
     slug = models.SlugField(

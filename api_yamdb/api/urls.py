@@ -9,11 +9,6 @@ app_name = 'api'
 router_api_v1 = DefaultRouter()
 
 router_api_v1.register(
-    r'auth',
-    AuthViewSet,
-    basename='auth'
-)
-router_api_v1.register(
     r'titles',
     TitleViewSet,
     basename='titles'
@@ -42,7 +37,6 @@ router_api_v1.register(
     r'auth',
     AuthViewSet,
     basename='auth')
-
 router_api_v1.register(
     r'users',
     UserViewSet,
