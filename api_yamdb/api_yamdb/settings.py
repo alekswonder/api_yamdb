@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-import django.core.mail.backends.console
 from dotenv import load_dotenv
 from datetime import timedelta
 

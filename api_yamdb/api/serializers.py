@@ -8,7 +8,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
-from titles.models import Category, Genre, Title, GenreTitle, Review, Comment
+from titles.models import Category, Genre, Title, Review, Comment
 from users.models import User
 
 USERNAME_ERROR = 'Имя должно содержать от 6 до 15 символов'

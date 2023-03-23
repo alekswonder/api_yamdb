@@ -17,8 +17,7 @@ from .serializers import (GenreSerializer, CategorySerializer,
                           TitleListSerializer, TitleCreateSerializer)
 from titles.models import Title, Genre, Category, Review
 from .pagination import ComplexObjectPagination
-from .permissions import (CustomAdminPermission, AuthorOrReadOnly,
-                          SafeMethodAdminPermission, AdminOrAuthorOrReadOnly)
+from .permissions import (CustomAdminPermission, SafeMethodAdminPermission,)
 from users.models import User
 
 CONFIRM_ERROR = 'Неверный код подтверждения'
