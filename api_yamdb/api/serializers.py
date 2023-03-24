@@ -8,7 +8,8 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
-from titles.models import Category, Genre, Title, Review, Comment
+from titles.models import Category, Genre, Title
+from reviews.models import Review, Comment
 from users.models import User
 
 USERNAME_ERROR = 'Имя должно содержать от 6 до 15 символов'
@@ -37,6 +38,24 @@ class AuthSerializer(serializers.Serializer):
             settings.ADMIN_EMAIL,
             [self.validated_data['email']],
         )
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализация объектов типа Comment."""
+    role = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('bio', 'email', 'first_name',
+                  'last_name', 'role', 'username')
+
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    """Сериализация объектов админа."""
+    class Meta:
+        model = User
+        fields = ('bio', 'email', 'first_name',
+                  'last_name', 'role', 'username')
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -131,7 +150,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        exclude = ('title',)
+        fields = '__all__'
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -147,22 +166,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        exclude = ('review',)
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """Сериализация объектов типа Comment."""
-    role = serializers.CharField(read_only=True)
-
-    class Meta:
-        model = User
-        fields = ('bio', 'email', 'first_name',
-                  'last_name', 'role', 'username')
-
-
-class AdminUserSerializer(serializers.ModelSerializer):
-    """Сериализация объектов админа."""
-    class Meta:
-        model = User
-        fields = ('bio', 'email', 'first_name',
-                  'last_name', 'role', 'username')
+        fields = '__all__'
