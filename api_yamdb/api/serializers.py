@@ -7,7 +7,6 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
-from rest_framework.validators import UniqueValidator
 
 from titles.models import Category, Genre, Title
 from reviews.models import Review, Comment
@@ -23,11 +22,11 @@ class AuthSerializer(serializers.Serializer):
     username = serializers.CharField(
         required=True,
         max_length=150,
-        validators=[validate_username]
+        validators=(validate_username,)
     )
     email = serializers.EmailField(required=True, max_length=254)
 
-    def get_confirm_code(self, **kwargs):
+    def get_confirm_code(self):
         user = User.objects.create(
             **self.validated_data, last_login=timezone.now()
         )
@@ -36,7 +35,7 @@ class AuthSerializer(serializers.Serializer):
             CONFIRM,
             f"{CONFIRM_NOTIFICATION}: {confirmation_code}",
             settings.ADMIN_EMAIL,
-            [self.validated_data['email']],
+            (self.validated_data['email'],),
         )
 
 
