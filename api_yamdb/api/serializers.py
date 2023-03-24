@@ -9,7 +9,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from titles.models import Category, Genre, Title, GenreTitle, Review, Comment
+from titles.models import Category, Genre, Title
+from reviews.models import Review, Comment
 from users.models import User
 from api.validators import validate_username
 
@@ -37,6 +38,24 @@ class AuthSerializer(serializers.Serializer):
             settings.ADMIN_EMAIL,
             [self.validated_data['email']],
         )
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализация объектов типа Comment."""
+    role = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('bio', 'email', 'first_name',
+                  'last_name', 'role', 'username')
+
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    """Сериализация объектов админа."""
+    class Meta:
+        model = User
+        fields = ('bio', 'email', 'first_name',
+                  'last_name', 'role', 'username')
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -131,7 +150,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        exclude = ('title',)
+        fields = '__all__'
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -147,30 +166,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        exclude = ('review',)
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """Сериализация объектов пользователя."""
-    role = serializers.CharField(read_only=True)
-    username = serializers.CharField(
-        required=True,
-        max_length=150,
-        validators=[
-            validate_username,
-            UniqueValidator(queryset=User.objects.all())
-        ]
-    )
-
-    class Meta:
-        model = User
-        fields = ('bio', 'email', 'first_name',
-                  'last_name', 'role', 'username')
-
-
-class AdminUserSerializer(serializers.ModelSerializer):
-    """Сериализация объектов админа."""
-    class Meta:
-        model = User
-        fields = ('bio', 'email', 'first_name',
-                  'last_name', 'role', 'username')
+        fields = '__all__'

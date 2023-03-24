@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-import django.core.mail.backends.console
 from dotenv import load_dotenv
 from datetime import timedelta
 
@@ -29,8 +28,9 @@ INSTALLED_APPS = [
     'django_filters',
 
     'titles.apps.TitlesConfig',
-    'api.apps.ApiConfig',
     'users.apps.UsersConfig',
+    'reviews.apps.ReviewsConfig',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
@@ -123,5 +123,4 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'users.User'
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 ADMIN_EMAIL = "admin@yamdb.com"

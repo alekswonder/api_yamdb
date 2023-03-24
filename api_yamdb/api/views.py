@@ -15,10 +15,11 @@ from .serializers import (GenreSerializer, CategorySerializer,
                           CommentSerializer, ReviewSerializer, AuthSerializer,
                           AdminUserSerializer, UserSerializer,
                           TitleListSerializer, TitleCreateSerializer)
-from titles.models import Title, Genre, Category, Review
+from titles.models import Title, Genre, Category
+from reviews.models import Review
 from .pagination import ComplexObjectPagination
-from .permissions import (CustomAdminPermission, AuthorOrReadOnly,
-                          SafeMethodAdminPermission, AdminOrAuthorOrReadOnly)
+from .permissions import (CustomAdminPermission, SafeMethodAdminPermission,
+                          AdminOrAuthorOrReadOnly,)
 from users.models import User
 
 CONFIRM_ERROR = 'Неверный код подтверждения'
@@ -66,6 +67,36 @@ class AuthViewSet(viewsets.GenericViewSet):
         tokens = dict(access_token=str(refresh.access_token),
                       refresh_token=str(refresh))
         return Response(tokens, status=status.HTTP_200_OK)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """Работа с юзерами"""
+    queryset = User.objects.all()
+    serializer_class = AdminUserSerializer
+    permission_classes = (CustomAdminPermission,)
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    filterset_fields = ('username',)
+    search_fields = ('username',)
+    lookup_field = 'username'
+
+    @action(detail=False, methods=['GET', 'PATCH'],
+            permission_classes=(IsAuthenticated,))
+    def me(self, request):
+        user = request.user
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif request.method == 'PATCH':
+            if user.role == 'user':
+                serializer = UserSerializer(user,
+                                            data=request.data, partial=True)
+            else:
+                serializer = AdminUserSerializer(user, data=request.data,
+                                                 partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -124,7 +155,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Представление модели Review."""
     serializer_class = ReviewSerializer
     pagination_class = ComplexObjectPagination
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (AdminOrAuthorOrReadOnly, )
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -140,7 +171,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Представление модели Comment."""
     serializer_class = CommentSerializer
     pagination_class = ComplexObjectPagination
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (AdminOrAuthorOrReadOnly, )
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
@@ -151,33 +182,3 @@ class CommentViewSet(viewsets.ModelViewSet):
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, id=review_id, title=title_id)
         serializer.save(author=self.request.user, review=review)
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    """Работа с юзерами"""
-    queryset = User.objects.all()
-    serializer_class = AdminUserSerializer
-    permission_classes = (CustomAdminPermission,)
-    pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
-    filterset_fields = ('username',)
-    search_fields = ('username',)
-    lookup_field = 'username'
-
-    @action(detail=False, methods=['GET', 'PATCH'],
-            permission_classes=(IsAuthenticated,))
-    def me(self, request):
-        user = request.user
-        if request.method == 'GET':
-            serializer = self.get_serializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        elif request.method == 'PATCH':
-            if user.role == 'user':
-                serializer = UserSerializer(user,
-                                            data=request.data, partial=True)
-            else:
-                serializer = AdminUserSerializer(user, data=request.data,
-                                                 partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
