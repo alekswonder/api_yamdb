@@ -7,25 +7,25 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
+from rest_framework.validators import UniqueValidator
 
 from titles.models import Category, Genre, Title
 from reviews.models import Review, Comment
 from users.models import User
+from api.validators import validate_username
 
-USERNAME_ERROR = 'Имя должно содержать от 6 до 15 символов'
 CONFIRM = 'Код подтверждения'
 CONFIRM_NOTIFICATION = 'Ваш код подтверждения'
 
 
 class AuthSerializer(serializers.Serializer):
-    """Валидация юзернейма и кода подтверждения """
-    username = serializers.CharField()
-    email = serializers.EmailField()
-
-    def validate_username(self, username):
-        if len(username) < 6:
-            raise ValidationError(USERNAME_ERROR)
-        return username
+    """Сериализация юзернейма и кода подтверждения """
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[validate_username]
+    )
+    email = serializers.EmailField(required=True, max_length=254)
 
     def get_confirm_code(self, **kwargs):
         user = User.objects.create(
