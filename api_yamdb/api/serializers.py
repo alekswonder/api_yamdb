@@ -1,60 +1,57 @@
 from django.db.models import Avg
-from django.conf import settings
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.utils import timezone
 
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
+from api.validators import validate_username
 from titles.models import Category, Genre, Title
 from reviews.models import Review, Comment
 from users.models import User
-from api.validators import validate_username
-
-CONFIRM = 'Код подтверждения'
-CONFIRM_NOTIFICATION = 'Ваш код подтверждения'
 
 
-class AuthSerializer(serializers.Serializer):
-    """Сериализация юзернейма и кода подтверждения """
-    username = serializers.CharField(
-        required=True,
-        max_length=150,
-        validators=(validate_username,)
-    )
-    email = serializers.EmailField(required=True, max_length=254)
+class SignUpSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True,
+                                     max_length=150,
+                                     validators=(validate_username,))
+    email = serializers.EmailField(required=True,
+                                   max_length=254)
 
-    def get_confirm_code(self):
-        user = User.objects.create(
-            **self.validated_data, last_login=timezone.now()
-        )
-        confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            CONFIRM,
-            f"{CONFIRM_NOTIFICATION}: {confirmation_code}",
-            settings.ADMIN_EMAIL,
-            (self.validated_data['email'],),
-        )
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+        user_first = User.objects.filter(username=username).first()
+        user_second = User.objects.filter(email=email).first()
+        if user_first != user_second:
+            raise serializers.ValidationError(
+                f'Пользователь с таким username:{username}'
+                f' или email:{email} уже существует.'
+            )
+        return data
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """Сериализация объектов типа Comment."""
-    role = serializers.CharField(read_only=True)
-
+class CustomUserSerializer(serializers.ModelSerializer):
+    """Сериализация объектов типа User."""
     class Meta:
         model = User
-        fields = ('bio', 'email', 'first_name',
-                  'last_name', 'role', 'username')
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
+        # extra_kwargs = {'username': {'required': True},
+        #                 'email': {'required': True}}
 
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                f'Создать пользователя с username:{value} невозможно'
+            )
+        return value
 
-class AdminUserSerializer(serializers.ModelSerializer):
-    """Сериализация объектов админа."""
-    class Meta:
-        model = User
-        fields = ('bio', 'email', 'first_name',
-                  'last_name', 'role', 'username')
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                f'Создать пользователя с email:{value} невозможно'
+            )
+        return value
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -80,7 +77,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class TitleListSerializer(serializers.ModelSerializer):
-    """Сериализация объектов типа Title"""
+    """Сериализация для безопасных запросов модели Title"""
     rating = serializers.SerializerMethodField()
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
@@ -100,6 +97,7 @@ class TitleListSerializer(serializers.ModelSerializer):
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
+    """Сериализация для небезопасных запросов модели Title"""
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
         slug_field='slug',
