@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (CategoryViewSet, GenreViewSet, TitleViewSet,
-                    ReviewViewSet, CommentViewSet, AuthViewSet, UserViewSet)
+                    ReviewViewSet, CommentViewSet, SignUpViewSet, UserViewSet)
 
 app_name = 'api'
 
@@ -35,7 +35,7 @@ router_api_v1.register(
 )
 router_api_v1.register(
     r'auth',
-    AuthViewSet,
+    SignUpViewSet,
     basename='auth')
 router_api_v1.register(
     r'users',
