@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from api_yamdb.settings import EMAIL_MAX_LENGTH, ROLE_MAX_LENGTH
+
 
 class User(AbstractUser):
     USER = 'user'
@@ -17,7 +19,7 @@ class User(AbstractUser):
     email = models.EmailField(
         verbose_name='Email',
         unique=True,
-        max_length=254
+        max_length=EMAIL_MAX_LENGTH
     )
     bio = models.TextField(
         verbose_name='Биография',
@@ -25,7 +27,7 @@ class User(AbstractUser):
     )
     role = models.CharField(
         verbose_name='Роль',
-        max_length=30,
+        max_length=ROLE_MAX_LENGTH,
         choices=CHOICES,
         default=USER,
         db_index=True

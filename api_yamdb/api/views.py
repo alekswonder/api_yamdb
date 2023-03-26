@@ -42,6 +42,14 @@ class ListCreateDestroyViewSet(mixins.ListModelMixin,
     pass
 
 
+class GenreCategoryViewSet(ListCreateDestroyViewSet):
+    pagination_class = PageNumberPagination
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+
 class SignUpViewSet(viewsets.GenericViewSet):
     """Регистрация и получение кода подтверждения"""
     permission_classes = (permissions.AllowAny,)
@@ -107,16 +115,13 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == 'GET':
             serializer = self.get_serializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        if request.method == 'PATCH':
-            serializer = self.get_serializer(user,
-                                             data=request.data,
-                                             partial=True
-                                             )
-            if serializer.is_valid():
-                serializer.save(role=request.user.role)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(user,
+                                         data=request.data,
+                                         partial=True
+                                         )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=request.user.role)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -149,26 +154,16 @@ class TitleViewSet(viewsets.ModelViewSet):
         return Response(output.data)
 
 
-class GenreViewSet(ListCreateDestroyViewSet):
+class GenreViewSet(GenreCategoryViewSet):
     """Представление модели Genre."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    pagination_classes = PageNumberPagination
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
-class CategoryViewSet(ListCreateDestroyViewSet):
+class CategoryViewSet(GenreCategoryViewSet):
     """Представление модели Category."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    pagination_classes = PageNumberPagination
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
