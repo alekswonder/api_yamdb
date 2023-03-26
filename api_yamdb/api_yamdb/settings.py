@@ -124,3 +124,8 @@ AUTH_USER_MODEL = 'users.User'
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 ADMIN_EMAIL = "admin@yamdb.com"
+
+NAME_MAX_LENGTH = 256
+SLUG_MAX_LENGTH = 50
+EMAIL_MAX_LENGTH = 254
+ROLE_MAX_LENGTH = 30

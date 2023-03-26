@@ -36,8 +36,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
-        # extra_kwargs = {'username': {'required': True},
-        #                 'email': {'required': True}}
 
     def validate_username(self, value):
         if value == 'me':
@@ -126,6 +124,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    class Meta:
+        model = Review
+        fields = '__all__'
+
     def validate(self, data):
         request = self.context['request']
         title_id = self.context['view'].kwargs.get('title_id')
@@ -137,17 +139,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 raise ValidationError('Вы не можете добавить более'
                                       'одного отзыва на произведение')
         return data
-
-    def validate_score(self, value):
-        if value < 1 or value > 10:
-            raise ValidationError(
-                f'Недопустимое значение, {value} должен быть от 1 до 10.'
-            )
-        return value
-
-    class Meta:
-        model = Review
-        fields = '__all__'
 
 
 class CommentSerializer(serializers.ModelSerializer):
