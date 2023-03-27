@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
 
-from api.validators import validate_username
+from utlis.validators import validate_username
 from titles.models import Category, Genre, Title
 from reviews.models import Review, Comment
 from users.models import User
@@ -30,26 +30,12 @@ class SignUpSerializer(serializers.Serializer):
         return data
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     """Сериализация объектов типа User."""
     class Meta:
         model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
-
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                f'Создать пользователя с username:{value} невозможно'
-            )
-        return value
-
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(
-                f'Создать пользователя с email:{value} невозможно'
-            )
-        return value
 
 
 class GenreSerializer(serializers.ModelSerializer):

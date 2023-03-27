@@ -8,13 +8,8 @@ class User(AbstractUser):
     USER = 'user'
     MODERATOR = 'moderator'
     ADMIN = 'admin'
-    roles_ru = ('Пользователь', 'Модератор', 'Администратор')
-    CHOICES = (tuple(zip((USER, MODERATOR, ADMIN), roles_ru)))
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.is_superuser:
-            self.role = self.ADMIN
+    ROLES_RU = ('Пользователь', 'Модератор', 'Администратор')
+    CHOICES = (tuple(zip((USER, MODERATOR, ADMIN), ROLES_RU)))
 
     email = models.EmailField(
         verbose_name='Email',
@@ -27,7 +22,7 @@ class User(AbstractUser):
     )
     role = models.CharField(
         verbose_name='Роль',
-        max_length=len(max(dict(CHOICES).values())),
+        max_length=len(max(dict(CHOICES).keys())),
         choices=CHOICES,
         default=USER,
         db_index=True

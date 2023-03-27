@@ -17,7 +17,7 @@ from .filters import TitleFilterSet
 from .serializers import (GenreSerializer, CategorySerializer,
                           CommentSerializer, ReviewSerializer,
                           TitleListSerializer, TitleCreateSerializer,
-                          CustomUserSerializer, SignUpSerializer)
+                          UserSerializer, SignUpSerializer)
 from titles.models import Title, Genre, Category
 from reviews.models import Review
 from .pagination import ComplexObjectPagination
@@ -97,7 +97,7 @@ class SignUpViewSet(viewsets.GenericViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     """Работа с юзерами"""
     queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = UserSerializer
     permission_classes = (AdminOnly,)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)

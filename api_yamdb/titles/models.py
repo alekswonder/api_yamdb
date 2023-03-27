@@ -1,6 +1,6 @@
 from django.db import models
 
-from api.validators import validate_year
+from utlis.validators import validate_year
 from api_yamdb.settings import NAME_MAX_LENGTH, SLUG_MAX_LENGTH
 
 
